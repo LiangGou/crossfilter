@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="http://littlesparkvt.com/flatstrap/assets/css/bootstrap.css"/>
+    <link type="text/css" rel="stylesheet" href="bar.brush.css"/>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="src.js"></script>
+</head>
+<body>
+<div class="row">
+    <div class="span2"><button class="btn btn-success" onclick="update()">update</button></div>
+    <div class="span2" id="sum">TOTAL: 0</div>
+</div>
+<div class="row" id="chart"></div>
+<script type="text/javascript">
+    var bar = charts.bar()
+                    .on('brush', makeSum)
+                    .on('brushend', makeSum),
+            data;
+
+    update();
+
+    function update() {
+        data = randomizeData(20, Math.random()*100000);
+
+        d3.select("#chart")
+                .datum(data)
+                .call(bar);
+    }
+
+    function makeSum() {
+        var sumDiv = d3.select('#sum'),
+                extent = d3.event.target.extent()
+        x = bar.x(),
+                sum = 0;
+        // inefficient recommend for performance to leverage crossfilter.js
+        data.forEach(function(d) {
+            if (extent[0] <= x(d.x) && x(d.x) + x.rangeBand() <= extent[1])
+                sum += d.y;
+        });
+        sumDiv.text('TOTAL: ' + sum);
+    }
+
+    function randomizeData(n, y) {
+        if (arguments.length < 2) y = 400;
+        if (!arguments.length) n = 20;
+        var i = 0;
+        return d3.range(~~(Math.random()*n) + 1).map(function(d, i) { return {
+            x: ++i,
+            y: ~~(Math.random()*y)
+        }});
+    }
+</script>
+</body>
+</html>
